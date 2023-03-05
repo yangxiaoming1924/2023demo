@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        ul,
+        ol,
+        li {
+            list-style: none;
+        }
+
+        .banner {
+            width: 600px;
+            height: 400px;
+            border: 10px solid #333;
+            margin: 30px auto;
+            position: relative;
+        }
+
+        .banner>ul {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .banner>ul>li {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 100px;
+            background-color: pink;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .banner>ul>li.active {
+            opacity: 1;
+        }
+
+        .banner>ol {
+            height: 30px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            background-color: rgba(0, 0, 0, .4);
+            border-radius: 15px;
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .banner>ol>li {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #fff;
+            cursor: pointer;
+            margin: 0 6px;
+        }
+
+        .banner>ol>li.active {
+            background-color: purple;
+        }
+
+        .banner>.leftRight {
+            width: 100%;
+            height: 40px;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .banner>.leftRight>span {
+            width: 20px;
+            height: 100%;
+            background-color: rgba(0, 0, 0, .4);
+            color: #fff;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="banner" id="banner">
+        <ul class="imgBox">
+            <li style="background-color: red;">1</li>
+            <li style="background-color: orange;">2</li>
+            <li style="background-color: green;">3</li>
+            <li style="background-color: skyblue;">4</li>
+            <li style="background-color: yellow;">5</li>
+            <li style="background-color: blue;">6</li>
+        </ul>
+
+        <ol class="pointBox">
+        </ol>
+
+        <div class="leftRight">
+            <span class="left">&lt;</span>
+            <span class="right">&gt;</span>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script>
+    // =================================================================
+    class AutoPlay {
+        constructor(container, options ) {
+            this.options = options;
+            this.container = container;
+            this.imgItems = container.querySelectorAll('.imgBox>li');
+            // 先执行创建点击的ol下的li
+            this.createPoint();
+            // 才能获取到生成的ol>li伪数组
+            this.pointItems = container.querySelectorAll('.pointBox>li');
+            // 给定时器返回值确立一个参数接收
+            this.timerID = null;
+            // 创建全局传递激活元素下标
+            this.activeIndex = 0;
+            // 页面加载结束时执行一次渲染
+            this.render();
+            // 图片根据配置是否自动播放
+            this.options.autoPlay ?? false ? this.imgAutoPlay() : void 0;
+
+            // 鼠标移入移出函数
+            this.mouseHover();
+            // 激活元素点击事件
+            this.activePointClick();
+            // 左右箭头点击事件
+            this.arrowClick();
+        }
+        // 自动播放图片
+        imgAutoPlay() {
+            this.timerID = setInterval(() => {
+                this.activeIndex++;
+                this.activeIndex === this.imgItems.length ? this.activeIndex = 0 : void 0;
+                // 执行渲染样式
+                this.render();
+            }, this.options.autoPlaySpeed ?? 1000)
+        }
+        // 先清除所有active,然后根据定时器中activeIndex++给特定元素添加active
+        render() {
+            this.imgItems.forEach(item => { item.classList.remove('active') });
+            this.imgItems[this.activeIndex].classList.add('active');
+            this.pointItems.forEach(item => { item.classList.remove('active') });
+            this.pointItems[this.activeIndex].classList.add('active');
+        }
+        // 根据图片的数量循环遍历向ol中添加li
+        createPoint() {
+            for (let i = 0; i < this.imgItems.length; i++) {
+                this.container.querySelector('ol').innerHTML += '<li></li>'
+            }
+        }
+        // 鼠标移入移出
+        mouseHover() {
+            // 鼠标移入 清除定时器
+            this.container.addEventListener('mouseenter', e => {
+                clearInterval(this.timerID);
+            });
+            // 鼠标移出 继续执行imgAutoPlay自动播放函数
+            this.container.addEventListener('mouseleave', e => {
+                if (options.autoPlay ?? false) {
+                    this.imgAutoPlay();
+                }
+            })
+        }
+        // 给ol下的li添加点击事件
+        activePointClick() {
+            this.pointItems.forEach((item, i) => {
+                item.addEventListener('click', e => {
+                    // 将ol下的li下标传递给全局变量activeIndex
+                    this.activeIndex = i;
+                    // 执行渲染函数
+                    this.render();
+                })
+            })
+        }
+        // 左右箭头点击事件
+        arrowClick() {
+            const left = document.querySelector('.left');
+            const right = document.querySelector('.right');
+            left.addEventListener('click', e => {
+                // 左侧箭头点击 让全局activeIndex-- 若小于0 或 ==-1 则 让activeIndex为图片最后一位下标
+                this.activeIndex--;
+                this.activeIndex == -1 ? this.activeIndex = this.imgItems.length - 1 : void 0;
+                // 执行样式渲染函数
+                this.render();
+            });
+            right.addEventListener('click', e => {
+                // 左侧箭头点击 让全局activeIndex++ 若大于最后一张图片下标或等于图片li长度 则 让activeIndex为第一位下标
+                this.activeIndex++;
+                this.activeIndex == this.imgItems.length ? this.activeIndex = 0 : void 0;
+                // 执行样式渲染函数
+                this.render();
+            });
+        }
+    }
+    // 创建 自动播放实例对象
+    const options = {
+        autoPlay: true,
+        autoPlaySpeed: 4000
+    }
+    const autoplay = new AutoPlay(document.querySelector('.banner'), options);
+    // =================================================================
+
+
+
+
+</script>
