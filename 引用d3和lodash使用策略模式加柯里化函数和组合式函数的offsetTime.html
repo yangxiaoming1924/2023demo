@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+</html>
+<script src="./d3.js"></script>
+<script src="./lodash.js"></script>
+<script>
+    /**
+     * 返回一个新的函数，用于对输入的时间字符串 增减或减少日期
+     *
+     * @examples offsetTime('%Y年%m月%d日 %H时%M分%S秒', 'day', 2)('2022年01月1日 12点12分12秒')
+     *       返回值为 -> '2022年01月03日 12点12分12秒'
+     *
+     * @param {String} pattern d3.time 的特殊字符，参考：https://github.com/d3/d3-time-format/tree/v4.0.0#locale_format
+     * @param {String} unit 枚举值：'year' || 'month' || 'week' || 'day' || 'hour' || 'minute' || 'second'
+     * @param {Number} step 单位时间的偏移量，可正可负
+     * @returns {Function}
+     */
+
+    //     function offsetTime(pattern, unit, step) { 
+    //      const  unitObj = {
+    //             'year':'timeYear',
+    //             'month':'timeMonth',
+    //             'week':'timeWeek',
+    //             'day':'timeDay',
+    //             'hour':'timeHour',
+    //             'minute':'timeMinute',
+    //             'second':'timeSecond'
+    //         }
+    //         return (currentDate)=>{
+    //            const parse =  d3.timeParse(pattern);
+    //           const offset = d3[unitObj[unit]].offset(parse(currentDate),step);
+    //           const format = d3.timeFormat(pattern);
+    //           const result = format(offset);
+    //           return result;
+    //         }
+    //     }
+    //   console.log( offsetTime('%Y年%m月%d日 %H时%M分%S秒', 'week', 1)('2022年01月1日 12时12分12秒'));
+
+
+              function offsetTime(pattern, unit, step) {
+                    const unitObj = {
+                        'year': 'timeYear',
+                        'month': 'timeMonth',
+                        'week': 'timeWeek',
+                        'day': 'timeDay',
+                        'hour': 'timeHour',
+                        'minute': 'timeMinute',
+                        'second': 'timeSecond'
+                    }
+                    return str => _.flow([
+                        d3.timeParse(pattern),
+                       _.curryRight( d3[unitObj[unit]].offset)(step),
+                        d3.timeFormat(pattern)
+                    ])(str);
+                }
+      console.log( offsetTime('%Y年%m月%d日 %H时%M分%S秒', 'day',2)('2022年01月1日 12时12分12秒'));
+
+</script>
